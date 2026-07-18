@@ -1,6 +1,8 @@
+#pragma once
+
 #include<cstdint>
 
-class CPU{
+class Registers{
     private:
         uint8_t a,f;
         uint8_t b,c;
@@ -10,7 +12,7 @@ class CPU{
 
     public:
 
-        CPU() {
+        Registers() {
             reset();
         }
 
@@ -22,7 +24,7 @@ class CPU{
             sp = 0xFFFE;
             pc = 0x0100;
         }
-        
+
         uint8_t get_a() const { return a; }
         void set_a(uint8_t val) { a = val; }
         
