@@ -27,6 +27,17 @@ class CPU {
         uint8_t xor_a_r8(uint8_t val);
         uint8_t or_a_r8(uint8_t val);
         uint16_t add_sp_imm8();
+        uint8_t rlc(uint8_t val);
+        uint8_t rrc(uint8_t val);
+        uint8_t rl(uint8_t val);
+        uint8_t rr(uint8_t val);
+        uint8_t sla(uint8_t val);
+        uint8_t sra(uint8_t val);
+        uint8_t srl(uint8_t val);
+        uint8_t swap(uint8_t val);
+        void bit(uint8_t val, uint8_t b);
+        uint8_t get_r8(uint8_t index);
+        void set_r8(uint8_t index, uint8_t val);
     
     public:
         CPU(MMU* mmu_ptr);

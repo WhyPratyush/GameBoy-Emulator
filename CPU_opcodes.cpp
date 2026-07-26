@@ -159,103 +159,31 @@ void CPU::execute(uint8_t opcode) {
         
         //dec r8
         case 0x05: //dec b
-            {
-                reg.set_b(dec_r8(reg.get_b()));
-            }
-            break;
-
         case 0x0D: //dec c
-            {
-                reg.set_c(dec_r8(reg.get_c()));
-            }
-            break;
-            
         case 0x15: //dec d
-            {
-                reg.set_d(dec_r8(reg.get_d()));
-            }
-            break;
-
         case 0x1D: //dec e
-            {
-                reg.set_e(dec_r8(reg.get_e()));
-            }
-            break;
-
         case 0x25: //dec h
-            {
-                reg.set_h(dec_r8(reg.get_h()));
-            }
-            break;
-
         case 0x2D: //dec l
-            {
-                reg.set_l(dec_r8(reg.get_l()));
-            }
-            break;
-
         case 0x35: //dec [hl]
-            {
-                uint16_t addr = reg.get_hl();
-                uint8_t val = mmu->readByte(addr);
-                mmu->writeByte(addr,dec_r8(val));
-            }
-            break;
-
         case 0x3D: //dec a
             {
-                reg.set_a(dec_r8(reg.get_a()));
+                uint8_t idx = (opcode >> 3) & 0x07;
+                set_r8(idx, dec_r8(get_r8(idx)));
             }
             break;
 
         //inc r8
         case 0x04: //inc b
-            {
-                reg.set_b(inc_r8(reg.get_b()));
-            }
-            break;
-
         case 0x0C: //inc c
-            {
-                reg.set_c(inc_r8(reg.get_c()));
-            }
-            break;
-            
         case 0x14: //inc d
-            {
-                reg.set_d(inc_r8(reg.get_d()));
-            }
-            break;
-
         case 0x1C: //inc e
-            {
-                reg.set_e(inc_r8(reg.get_e()));
-            }
-            break;
-
         case 0x24: //inc h
-            {
-                reg.set_h(inc_r8(reg.get_h()));
-            }
-            break;
-
         case 0x2C: //inc l
-            {
-                reg.set_l(inc_r8(reg.get_l()));
-            }
-            break;
-
         case 0x34: //inc [hl]
-            {
-                uint16_t addr = reg.get_hl();
-                uint8_t val = mmu->readByte(addr);
-                mmu->writeByte(addr,inc_r8(val));
-            }
-            break;
-
         case 0x3C: //inc a
             {
-                reg.set_a(inc_r8(reg.get_a()));
+                uint8_t idx = (opcode >> 3) & 0x07;
+                set_r8(idx, inc_r8(get_r8(idx)));
             }
             break;
 
@@ -286,66 +214,18 @@ void CPU::execute(uint8_t opcode) {
 
         //ld r8,imm8
         case 0x06: //ld b
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_b(data);
-            }
-            break;
-
         case 0x0E: //ld c
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_c(data);
-            }
-            break;
-
         case 0x16: //ld d
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_d(data);
-            }
-            break;
-
         case 0x1E: //ld e
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_e(data);
-            }
-            break;
-
         case 0x26: //ld h
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_h(data);
-            }
-            break;
-
         case 0x2E: //ld l
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                reg.set_l(data);
-            }
-            break;
-
         case 0x36: //ld [hl]
-            {
-                uint8_t data = mmu->readByte(pc);
-                pc++;
-                mmu->writeByte(reg.get_hl(),data);
-            }
-            break;
-
         case 0x3E: //ld a
             {
                 uint8_t data = mmu->readByte(pc);
                 pc++;
-                reg.set_a(data);
+                uint8_t dst_idx = (opcode >> 3) & 0x07;
+                set_r8(dst_idx, data);
             }
             break;
 
@@ -508,326 +388,72 @@ void CPU::execute(uint8_t opcode) {
         //BLOCK 1
         // ld r8,r8 
         case 0x40: //ld b,b
-            {
-                reg.set_b(reg.get_b());
-            }
-            break;
-
         case 0x41: //ld b,c
-            {
-                reg.set_b(reg.get_c());
-            }
-            break;
-
         case 0x42: //ld b,d
-            {
-                reg.set_b(reg.get_d());
-            }
-            break;
-        
         case 0x43: //ld b,e
-            {
-                reg.set_b(reg.get_e());
-            }
-            break;
-
         case 0x44: //ld b,h
-            {
-                reg.set_b(reg.get_h());
-            }
-            break;
-
         case 0x45: //ld b,l
-            {
-                reg.set_b(reg.get_l());
-            }
-            break;
-
         case 0x46: //ld b,[hl]
-            {
-                reg.set_b(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x47: //ld b,a
-            {
-                reg.set_b(reg.get_a());
-            }
-            break;
-
         case 0x48: //ld c,b
-            {
-                reg.set_c(reg.get_b());
-            }
-            break;
-
         case 0x49: //ld c,c
-            {
-                reg.set_c(reg.get_c());
-            }
-            break;
-
         case 0x4A: //ld c,d
-            {
-                reg.set_c(reg.get_d());
-            }
-            break;
-        
         case 0x4B: //ld c,e
-            {
-                reg.set_c(reg.get_e());
-            }
-            break;
-
         case 0x4C: //ld c,h
-            {
-                reg.set_c(reg.get_h());
-            }
-            break;
-
         case 0x4D: //ld c,l
-            {
-                reg.set_c(reg.get_l());
-            }
-            break;
-
         case 0x4E: //ld c,[hl]
-            {
-                reg.set_c(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x4F: //ld c,a
-            {
-                reg.set_c(reg.get_a());
-            }
-            break;
-
         case 0x50: //ld d,b
-            {
-                reg.set_d(reg.get_b());
-            }
-            break;
-
         case 0x51: //ld d,c
-            {
-                reg.set_d(reg.get_c());
-            }
-            break;
-
         case 0x52: //ld d,d
-            {
-                reg.set_d(reg.get_d());
-            }
-            break;
-        
         case 0x53: //ld d,e
-            {
-                reg.set_d(reg.get_e());
-            }
-            break;
-
         case 0x54: //ld d,h
-            {
-                reg.set_d(reg.get_h());
-            }
-            break;
-
         case 0x55: //ld d,l
-            {
-                reg.set_d(reg.get_l());
-            }
-            break;
-
         case 0x56: //ld d,[hl]
-            {
-                reg.set_d(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x57: //ld d,a
-            {
-                reg.set_d(reg.get_a());
-            }
-            break;
-
         case 0x58: //ld e,b
-            {
-                reg.set_e(reg.get_b());
-            }
-            break;
-
         case 0x59: //ld e,c
-            {
-                reg.set_e(reg.get_c());
-            }
-            break;
-
         case 0x5A: //ld e,d
-            {
-                reg.set_e(reg.get_d());
-            }
-            break;
-        
         case 0x5B: //ld e,e
-            {
-                reg.set_e(reg.get_e());
-            }
-            break;
-
         case 0x5C: //ld e,h
-            {
-                reg.set_e(reg.get_h());
-            }
-            break;
-
         case 0x5D: //ld e,l
-            {
-                reg.set_e(reg.get_l());
-            }
-            break;
-
         case 0x5E: //ld e,[hl]
-            {
-                reg.set_e(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x5F: //ld e,a
-            {
-                reg.set_e(reg.get_a());
-            }
-            break;
-        
         case 0x60: //ld h,b
-            {
-                reg.set_h(reg.get_b());
-            }
-            break;
-
         case 0x61: //ld h,c
-            {
-                reg.set_h(reg.get_c());
-            }
-            break;
-
         case 0x62: //ld h,d
-            {
-                reg.set_h(reg.get_d());
-            }
-            break;
-        
         case 0x63: //ld h,e
-            {
-                reg.set_h(reg.get_e());
-            }
-            break;
-
         case 0x64: //ld h,h
-            {
-                reg.set_h(reg.get_h());
-            }
-            break;
-
         case 0x65: //ld h,l
-            {
-                reg.set_h(reg.get_l());
-            }
-            break;
-
         case 0x66: //ld h,[hl]
-            {
-                reg.set_h(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x67: //ld h,a
-            {
-                reg.set_h(reg.get_a());
-            }
-            break;
-
         case 0x68: //ld l,b
-            {
-                reg.set_l(reg.get_b());
-            }
-            break;
-
         case 0x69: //ld l,c
-            {
-                reg.set_l(reg.get_c());
-            }
-            break;
-
         case 0x6A: //ld l,d
-            {
-                reg.set_l(reg.get_d());
-            }
-            break;
-        
         case 0x6B: //ld l,e
-            {
-                reg.set_l(reg.get_e());
-            }
-            break;
-
         case 0x6C: //ld l,h
-            {
-                reg.set_l(reg.get_h());
-            }
-            break;
-
         case 0x6D: //ld l,l
-            {
-                reg.set_l(reg.get_l());
-            }
-            break;
-
         case 0x6E: //ld l,[hl]
-            {
-                reg.set_l(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0x6F: //ld l,a
-            {
-                reg.set_l(reg.get_a());
-            }
-            break;
-
         case 0x70: //ld [hl],b;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_b());
-            }
-            break;
-
         case 0x71: //ld [hl],c;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_c());
-            }
-            break;
-
         case 0x72: //ld [hl],d;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_d());
-            }
-            break;
-
         case 0x73: //ld [hl],e;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_e());
-            }
-            break;
-
         case 0x74: //ld [hl],h;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_h());
-            }
-            break;
-
         case 0x75: //ld [hl],l;
+        case 0x77: //ld [hl],a;
+        case 0x78: //ld a,b
+        case 0x79: //ld a,c
+        case 0x7A: //ld a,d
+        case 0x7B: //ld a,e
+        case 0x7C: //ld a,h
+        case 0x7D: //ld a,l
+        case 0x7E: //ld a,[hl]
+        case 0x7F: //ld a,a
             {
-                mmu->writeByte(reg.get_hl(),reg.get_l());
+                uint8_t dst_idx = (opcode >> 3) & 0x07;
+                uint8_t src_idx = opcode & 0x07;
+                set_r8(dst_idx, get_r8(src_idx));
             }
             break;
 
@@ -837,450 +463,124 @@ void CPU::execute(uint8_t opcode) {
             }
             break;
 
-        case 0x77: //ld [hl],a;
-            {
-                mmu->writeByte(reg.get_hl(),reg.get_a());
-            }
-            break;
-
-        case 0x78: //ld a,b
-            {
-                reg.set_a(reg.get_b());
-            }
-            break;
-
-        case 0x79: //ld a,c
-            {
-                reg.set_a(reg.get_c());
-            }
-            break;
-
-        case 0x7A: //ld a,d
-            {
-                reg.set_a(reg.get_d());
-            }
-            break;
-        
-        case 0x7B: //ld a,e
-            {
-                reg.set_a(reg.get_e());
-            }
-            break;
-
-        case 0x7C: //ld a,h
-            {
-                reg.set_a(reg.get_h());
-            }
-            break;
-
-        case 0x7D: //ld a,l
-            {
-                reg.set_a(reg.get_l());
-            }
-            break;
-
-        case 0x7E: //ld a,[hl]
-            {
-                reg.set_a(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
-        case 0x7F: //ld a,a
-            {
-                reg.set_a(reg.get_a());
-            }
-            break;
-
         //BLOCK 2
         //add a,r8
         case 0x80: //add a,b
-            {
-                reg.set_a(add_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0x81: //add a,c
-            {
-                reg.set_a(add_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0x82: //add a,d
-            {
-                reg.set_a(add_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0x83: //add a,e
-            {
-                reg.set_a(add_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0x84: //add a,h
-            {
-                reg.set_a(add_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0x85: //add a,l
-            {
-                reg.set_a(add_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0x86: //add a,[hl]
-            {
-                reg.set_a(add_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0x87: //add a,a
             {
-                reg.set_a(add_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(add_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //adc a,r8
         case 0x88: //adc a,b
-            {
-                reg.set_a(adc_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0x89: //adc a,c
-            {
-                reg.set_a(adc_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0x8A: //adc a,d
-            {
-                reg.set_a(adc_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0x8B: //adc a,e
-            {
-                reg.set_a(adc_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0x8C: //adc a,h
-            {
-                reg.set_a(adc_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0x8D: //adc a,l
-            {
-                reg.set_a(adc_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0x8E: //adc a,[hl]
-            {
-                reg.set_a(adc_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0x8F: //adc a,a
             {
-                reg.set_a(adc_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(adc_a_r8(get_r8(reg_idx)));
             }
             break;
             
         //sub a, r8
         case 0x90: //sub a,b
-            {
-                reg.set_a(sub_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0x91: //sub a,c
-            {
-                reg.set_a(sub_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0x92: //sub a,d
-            {
-                reg.set_a(sub_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0x93: //sub a,e
-            {
-                reg.set_a(sub_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0x94: //sub a,h
-            {
-                reg.set_a(sub_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0x95: //sub a,l
-            {
-                reg.set_a(sub_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0x96: //sub a,[hl]
-            {
-                reg.set_a(sub_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0x97: //sub a,a
             {
-                reg.set_a(sub_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(sub_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //sbc a, r8
         case 0x98: //sbc a,b
-            {
-                reg.set_a(sbc_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0x99: //sbc a,c
-            {
-                reg.set_a(sbc_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0x9A: //sbc a,d
-            {
-                reg.set_a(sbc_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0x9B: //sbc a,e
-            {
-                reg.set_a(sbc_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0x9C: //sbc a,h
-            {
-                reg.set_a(sbc_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0x9D: //sbc a,l
-            {
-                reg.set_a(sbc_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0x9E: //sbc a,[hl]
-            {
-                reg.set_a(sbc_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0x9F: //sbc a,a
             {
-                reg.set_a(sbc_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(sbc_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //and a,r8
         case 0xA0: //and a,b
-            {
-                reg.set_a(and_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0xA1: //and a,c
-            {
-                reg.set_a(and_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0xA2: //and a,d
-            {
-                reg.set_a(and_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0xA3: //and a,e
-            {
-                reg.set_a(and_a_r8(reg.get_e()));
-            }
-            break;
-        
         case 0xA4: //and a,h
-            {
-                reg.set_a(and_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0xA5: //and a,l
-            {
-                reg.set_a(and_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0xA6: //and a,[hl]
-            {
-                reg.set_a(and_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0xA7: //and a,a
             {
-                reg.set_a(and_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(and_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //xor a,r8
         case 0xA8: //xor a,b
-            {
-                reg.set_a(xor_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0xA9: //xor a,c
-            {
-                reg.set_a(xor_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0xAA: //xor a,d
-            {
-                reg.set_a(xor_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0xAB: //xor a,e
-            {
-                reg.set_a(xor_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0xAC: //xor a,h
-            {
-                reg.set_a(xor_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0xAD: //xor a,l
-            {
-                reg.set_a(xor_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0xAE: //xor a,[hl]
-            {
-                reg.set_a(xor_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0xAF: //xor a,a
             {
-                reg.set_a(xor_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(xor_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //or a,r8
         case 0xB0: //or a,b
-            {
-                reg.set_a(or_a_r8(reg.get_b()));
-            }
-            break;
-
         case 0xB1: //or a,c
-            {
-                reg.set_a(or_a_r8(reg.get_c()));
-            }
-            break;
-
         case 0xB2: //or a,d
-            {
-                reg.set_a(or_a_r8(reg.get_d()));
-            }
-            break;
-
         case 0xB3: //or a,e
-            {
-                reg.set_a(or_a_r8(reg.get_e()));
-            }
-            break;
-
         case 0xB4: //or a,h
-            {
-                reg.set_a(or_a_r8(reg.get_h()));
-            }
-            break;
-
         case 0xB5: //or a,l
-            {
-                reg.set_a(or_a_r8(reg.get_l()));
-            }
-            break;
-
         case 0xB6: //or a,[hl]
-            {
-                reg.set_a(or_a_r8(mmu->readByte(reg.get_hl())));
-            }
-            break;
-
         case 0xB7: //or a,a
             {
-                reg.set_a(or_a_r8(reg.get_a()));
+                uint8_t reg_idx = opcode & 0x07;
+                reg.set_a(or_a_r8(get_r8(reg_idx)));
             }
             break;
 
         //cp a,r8 - compare a with r8
         case 0xB8: //cp a,b
-            {
-                sub_a_r8(reg.get_b());
-            }
-            break;
-
         case 0xB9: //cp a,c
-            {
-                sub_a_r8(reg.get_c());
-            }
-            break;
-
         case 0xBA: //cp a,d
-            {
-                sub_a_r8(reg.get_d());
-            }
-            break;
-
         case 0xBB: //cp a,e
-            {
-                sub_a_r8(reg.get_e());
-            }
-            break;
-
         case 0xBC: //cp a,h
-            {
-                sub_a_r8(reg.get_h());
-            }
-            break;
-
         case 0xBD: //cp a,l
-            {
-                sub_a_r8(reg.get_l());
-            }
-            break;
-
         case 0xBE: //cp a,[hl]
-            {
-                sub_a_r8(mmu->readByte(reg.get_hl()));
-            }
-            break;
-
         case 0xBF: //cp a,a
             {
-                sub_a_r8(reg.get_a());
+                uint8_t reg_idx = opcode & 0x07;
+                sub_a_r8(get_r8(reg_idx));
             }
             break;
             
