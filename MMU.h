@@ -13,7 +13,7 @@ class MMU{
         std::array<uint8_t,160> oam{};   // Object attribute memory
         std::array<uint8_t,128> ioreg{}; // I/O registers
         std::array<uint8_t,127> hram{};  // High ram
-        uint8_t ieReg = 0;                   // Input Enable Register   
+        uint8_t ieReg = 0;               // Input Enable Register   
     
     public:
         void loadRom(const std::vector<uint8_t>& data) {
@@ -52,7 +52,7 @@ class MMU{
             //HRAM
             if(addr <= 0xFFFE) return hram[addr-0xFF80];
 
-            //Intterupt Enable Reg
+            //Interrupt Enable Reg
             return  ieReg;
         }
 

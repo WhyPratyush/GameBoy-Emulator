@@ -8,7 +8,6 @@ class Registers{
         uint8_t b,c;
         uint8_t d,e;
         uint8_t h,l;
-        uint16_t sp, pc;
 
     public:
 
@@ -21,8 +20,6 @@ class Registers{
             set_bc(0x0013);
             set_de(0x00D8);
             set_hl(0x014D);
-            sp = 0xFFFE;
-            pc = 0x0100;
         }
 
         uint8_t get_a() const { return a; }
@@ -50,8 +47,8 @@ class Registers{
         void set_f(uint8_t val) { f = static_cast<uint8_t>(val & 0xF0); }
 
         uint16_t get_af() const {
-        return (a << 8) | f;
-    }
+            return (a << 8) | f;
+        }
 
     void set_af(uint16_t val) {
         a = static_cast<uint8_t>((val >> 8) & 0xFF); 
@@ -99,10 +96,4 @@ class Registers{
         if (set) f |= 0x10; 
         else f &= static_cast<uint8_t>(~0x10); 
     }
-
-    uint16_t get_sp() const { return sp; }
-    void set_sp(uint16_t val) { sp = val; }
-
-    uint16_t get_pc() const { return pc; }
-    void set_pc(uint16_t val) { pc = val; }
 };
