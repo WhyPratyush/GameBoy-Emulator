@@ -1,406 +1,406 @@
 #include "CPU.h"
 
-void CPU::executeCB(uint8_t opcode) {
+uint8_t CPU::executeCB(uint8_t opcode) {
     switch (opcode) {
         //rlc r8
         case 0x00: //rlc b
             {
                 reg.set_b(rlc(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x01: //rlc c
             {
                 reg.set_c(rlc(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x02: //rlc d
             {
                 reg.set_d(rlc(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x03: //rlc e
             {
                 reg.set_e(rlc(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x04: //rlc h
             {
                 reg.set_h(rlc(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x05: //rlc l
             {
                 reg.set_l(rlc(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x06: //rlc [hl]
             {
                 uint8_t val = rlc(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x07: //rlc a
             {
                 reg.set_a(rlc(reg.get_a()));
             }
-            break;
+            return 8;
         
         //rrc r8
         case 0x08: //rrc b
             {
                 reg.set_b(rrc(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x09: //rrc c
             {
                 reg.set_c(rrc(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x0A: //rrc d
             {
                 reg.set_d(rrc(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x0B: //rrc e
             {
                 reg.set_e(rrc(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x0C: //rrc h
             {
                 reg.set_h(rrc(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x0D: //rrc l
             {
                 reg.set_l(rrc(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x0E: //rrc [hl]
             {
                 uint8_t val = rrc(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x0F: //rrc a
             {
                 reg.set_a(rrc(reg.get_a()));
             }
-            break;
+            return 8;
 
         //rl r8
         case 0x10: //rl b
             {
                 reg.set_b(rl(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x11: //rl c
             {
                 reg.set_c(rl(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x12: //rl d
             {
                 reg.set_d(rl(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x13: //rl e
             {
                 reg.set_e(rl(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x14: //rl h
             {
                 reg.set_h(rl(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x15: //rl l
             {
                 reg.set_l(rl(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x16: //rl [hl]
             {
                 uint8_t val = rl(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x17: //rl a
             {
                 reg.set_a(rl(reg.get_a()));
             }
-            break;
+            return 8;
 
         //rr r8
         case 0x18: //rr b
             {
                 reg.set_b(rr(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x19: //rr c
             {
                 reg.set_c(rr(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x1A: //rr d
             {
                 reg.set_d(rr(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x1B: //rr e
             {
                 reg.set_e(rr(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x1C: //rr h
             {
                 reg.set_h(rr(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x1D: //rr l
             {
                 reg.set_l(rr(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x1E: //rr [hl]
             {
                 uint8_t val = rr(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x1F: //rr a
             {
                 reg.set_a(rr(reg.get_a()));
             }
-            break;
+            return 8;
 
         //sla r8
         case 0x20: //sla b
             {
                 reg.set_b(sla(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x21: //sla c
             {
                 reg.set_c(sla(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x22: //sla d
             {
                 reg.set_d(sla(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x23: //sla e
             {
                 reg.set_e(sla(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x24: //sla h
             {
                 reg.set_h(sla(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x25: //sla l
             {
                 reg.set_l(sla(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x26: //sla [hl]
             {
                 uint8_t val = sla(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x27: //sla a
             {
                 reg.set_a(sla(reg.get_a()));
             }
-            break;
+            return 8;
 
         //sra r8
         case 0x28: //sra b
             {
                 reg.set_b(sra(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x29: //sra c
             {
                 reg.set_c(sra(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x2A: //sra d
             {
                 reg.set_d(sra(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x2B: //sra e
             {
                 reg.set_e(sra(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x2C: //sra h
             {
                 reg.set_h(sra(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x2D: //sra l
             {
                 reg.set_l(sra(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x2E: //sra [hl]
             {
                 uint8_t val = sra(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x2F: //sra a
             {
                 reg.set_a(sra(reg.get_a()));
             }
-            break;
+            return 8;
 
         //swap r8
         case 0x30: //swap b
             {
                 reg.set_b(swap(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x31: //swap c
             {
                 reg.set_c(swap(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x32: //swap d
             {
                 reg.set_d(swap(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x33: //swap e
             {
                 reg.set_e(swap(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x34: //swap h
             {
                 reg.set_h(swap(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x35: //swap l
             {
                 reg.set_l(swap(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x36: //swap [hl]
             {
                 uint8_t val = swap(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x37: //swap a
             {
                 reg.set_a(swap(reg.get_a()));
             }
-            break;
+            return 8;
 
         //srl r8
         case 0x38: //srl b
             {
                 reg.set_b(srl(reg.get_b()));
             }
-            break;
+            return 8;
 
         case 0x39: //srl c
             {
                 reg.set_c(srl(reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0x3A: //srl d
             {
                 reg.set_d(srl(reg.get_d()));
             }
-            break;
+            return 8;
 
         case 0x3B: //srl e
             {
                 reg.set_e(srl(reg.get_e()));
             }
-            break;
+            return 8;
 
         case 0x3C: //srl h
             {
                 reg.set_h(srl(reg.get_h()));
             }
-            break;
+            return 8;
 
         case 0x3D: //srl l
             {
                 reg.set_l(srl(reg.get_l()));
             }
-            break;
+            return 8;
 
         case 0x3E: //srl [hl]
             {
                 uint8_t val = srl(mmu->readByte(reg.get_hl()));
                 mmu->writeByte(reg.get_hl(),val);
             }
-            break;
+            return 16;
 
         case 0x3F: //srl a
             {
                 reg.set_a(srl(reg.get_a()));
             }
-            break;
+            return 8;
 
         case 0x40:
         case 0x41:
@@ -470,8 +470,8 @@ void CPU::executeCB(uint8_t opcode) {
                 uint8_t bit_index = (opcode >> 3) & 0x07;
                 uint8_t reg_index = opcode & 0x07;
                 bit(get_r8(reg_index), bit_index);
+                return (reg_index == 6) ? 12 : 8;
             }
-            break;
 
         case 0x80:
         case 0x81:
@@ -542,8 +542,8 @@ void CPU::executeCB(uint8_t opcode) {
                 uint8_t reg_index = opcode & 0x07;
                 uint8_t val = get_r8(reg_index);
                 set_r8(reg_index, static_cast<uint8_t>(val & ~(1 << bit_index)));
+                return (reg_index == 6) ? 16 : 8;
             }
-            break;
 
         case 0xC0:
         case 0xC1:
@@ -614,8 +614,8 @@ void CPU::executeCB(uint8_t opcode) {
                 uint8_t reg_index = opcode & 0x07;
                 uint8_t val = get_r8(reg_index);
                 set_r8(reg_index, static_cast<uint8_t>(val | (1 << bit_index)));
+                return (reg_index == 6) ? 16 : 8;
             }
-            break;
 
         default:
             printf("Unimplemented CB Opcode: 0x%02X at PC: 0x%04X\n", opcode, pc - 1);

@@ -44,6 +44,6 @@ class CPU {
         void reset();
         uint8_t fetch();
         
-        void execute(uint8_t opcode);
-        void executeCB(uint8_t opcode);
+        uint8_t execute(uint8_t opcode);
+        uint8_t executeCB(uint8_t opcode);
 };

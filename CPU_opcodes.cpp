@@ -1,11 +1,11 @@
 #include "CPU.h"
 
-void CPU::execute(uint8_t opcode) {
+uint8_t CPU::execute(uint8_t opcode) {
     switch (opcode) {
         //BLOCK 0:
         //nop
         case 0x00:
-            break;
+            return 4;
 
         //ld r16,imm16
         case 0x01: //ld bc,imm16
@@ -14,7 +14,7 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 reg.set_bc(data);
             }
-            break;
+            return 12;
 
         case 0x11: //ld de,imm16
             {
@@ -22,7 +22,7 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 reg.set_de(data);
             }
-            break;
+            return 12;
         
         case 0x21: //ld hl,imm16
             {
@@ -30,7 +30,7 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 reg.set_hl(data);
             }
-            break;
+            return 12;
 
         case 0x31: //ld sp,imm16
             {
@@ -38,20 +38,20 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 sp = data;
             }
-            break;
+            return 12;
 
         //ld [r16mem],a
         case 0x02: //ld [bc],a
             {
                 mmu->writeByte(reg.get_bc(),reg.get_a());
             }
-            break;
+            return 8;
 
         case 0x12: //ld [de],a
             {
                 mmu->writeByte(reg.get_de(),reg.get_a());
             }
-            break;
+            return 8;
 
         case 0x22: //ld [hl+],a (increase hl after setting it)
             {
@@ -59,7 +59,7 @@ void CPU::execute(uint8_t opcode) {
                 mmu->writeByte(hl,reg.get_a());
                 reg.set_hl(static_cast<uint16_t>(hl+1));
             }
-            break;
+            return 8;
 
         case 0x32: //ld [hl-],a (decrease hl after setting it)
             {
@@ -67,20 +67,20 @@ void CPU::execute(uint8_t opcode) {
                 mmu->writeByte(hl,reg.get_a());
                 reg.set_hl(static_cast<uint16_t>(hl-1));
             }
-            break;
+            return 8;
 
         //ld a,[r16mem]
         case 0x0A: //ld a,[bc]
             {
                 reg.set_a(mmu->readByte(reg.get_bc()));
             }
-            break;
+            return 8;
             
         case 0x1A: //ld a,[de]
             {
                 reg.set_a(mmu->readByte(reg.get_de()));
             }
-            break;
+            return 8;
 
         case 0x2A: //ld a,[hl+]
             {
@@ -88,7 +88,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_a(mmu->readByte(hl));
                 reg.set_hl(static_cast<uint16_t>(hl+1));
             }
-            break;
+            return 8;
 
         case 0x3A: //ld a,[hl-]
             {
@@ -96,7 +96,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_a(mmu->readByte(hl));
                 reg.set_hl(static_cast<uint16_t>(hl-1));
             }
-            break;
+            return 8;
 
         //ld [imm16],sp
         case 0x08:
@@ -105,57 +105,57 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 mmu->writeWord(imm16,sp);
             }
-            break;
+            return 20;
         
         //inc r16
         case 0x03: //inc bc
             {
                 reg.set_bc(static_cast<uint16_t>(reg.get_bc()+1));
             }
-            break;
+            return 8;
 
         case 0x13: //inc de
             {
                 reg.set_de(static_cast<uint16_t>(reg.get_de()+1));
             }
-            break;
+            return 8;
 
         case 0x23: //inc hl
             {
                 reg.set_hl(static_cast<uint16_t>(reg.get_hl()+1));
             }
-            break;
+            return 8;
 
         case 0x33: //inc sp
             {
                 sp++;
             }
-            break;
+            return 8;
         
         //dec r16
         case 0x0B: //dec bc
             {
                 reg.set_bc(static_cast<uint16_t>(reg.get_bc()-1));
             }
-            break;
+            return 8;
 
         case 0x1B: //dec de
             {
                 reg.set_de(static_cast<uint16_t>(reg.get_de()-1));
             }
-            break;
+            return 8;
 
         case 0x2B: //dec hl
             {
                 reg.set_hl(static_cast<uint16_t>(reg.get_hl()-1));
             }
-            break;
+            return 8;
 
         case 0x3B: //dec sp
             {
                 sp--;
             }
-            break;
+            return 8;
         
         //dec r8
         case 0x05: //dec b
@@ -169,8 +169,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t idx = (opcode >> 3) & 0x07;
                 set_r8(idx, dec_r8(get_r8(idx)));
+                return (idx == 6) ? 12 : 4;
             }
-            break;
 
         //inc r8
         case 0x04: //inc b
@@ -184,33 +184,33 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t idx = (opcode >> 3) & 0x07;
                 set_r8(idx, inc_r8(get_r8(idx)));
+                return (idx == 6) ? 12 : 4;
             }
-            break;
 
         //add hl, r16
         case 0x09: //add hl,bc
             {
                 reg.set_hl(add_hl_r16(reg.get_bc()));
             }
-            break;
+            return 8;
 
         case 0x19: //add hl,de
             {
                 reg.set_hl(add_hl_r16(reg.get_de()));
             }
-            break;
+            return 8;
 
         case 0x29: //add hl,hl
             {
                 reg.set_hl(add_hl_r16(reg.get_hl()));
             }
-            break;
+            return 8;
 
         case 0x39: //add hl,sp
             {
                 reg.set_hl(add_hl_r16(sp));
             }
-            break;
+            return 8;
 
         //ld r8,imm8
         case 0x06: //ld b
@@ -226,8 +226,8 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 uint8_t dst_idx = (opcode >> 3) & 0x07;
                 set_r8(dst_idx, data);
+                return (dst_idx == 6) ? 12 : 8;
             }
-            break;
 
         case 0x07: //rlca - rotate a to left
             {
@@ -239,7 +239,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_c_flag(bit);
                 reg.set_n_flag(false);
             }
-            break;
+            return 4;
 
         case 0x0F: //rrca - rotate a to right
             {
@@ -251,7 +251,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_c_flag(bit);
                 reg.set_n_flag(false);
             }
-            break;
+            return 4;
 
         case 0x17: //rla - rotate a with c flag to left
             {
@@ -263,7 +263,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_z_flag(false);
                 reg.set_n_flag(false);
             }
-            break;
+            return 4;
 
         case 0x1F: //rra - rotate a with c flag to right
             {
@@ -275,7 +275,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_z_flag(false);
                 reg.set_n_flag(false);
             }
-            break;
+            return 4;
 
         case 0x27: //daa - decimal adjusted addition
             {
@@ -300,7 +300,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_h_flag(false);
                 if(carry) reg.set_c_flag(true);
             }
-            break;
+            return 4;
 
         case 0x2F: //cpl - complement a
             {
@@ -309,7 +309,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_n_flag(true);
                 reg.set_h_flag(true);
             }
-            break;
+            return 4;
 
         case 0x37: //scf - set carry flag
             {
@@ -317,7 +317,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_n_flag(false);
                 reg.set_h_flag(false);
             }
-            break;
+            return 4;
 
         case 0x3F: //ccf - complement carry flag
             {
@@ -325,7 +325,7 @@ void CPU::execute(uint8_t opcode) {
                 reg.set_n_flag(false);
                 reg.set_h_flag(false);
             }
-            break;
+            return 4;
 
         //jr - jump relative, basically takes an offset between -128 to 127 and pc += offset
         //only takes 2 bytes instead of 3 like jp
@@ -335,7 +335,7 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 pc = static_cast<uint16_t>(pc + offset);
             }
-            break;
+            return 12;
 
         case 0x20: //jr nz imm8 (jnz)
             {
@@ -343,9 +343,10 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 if(!reg.get_z_flag()) {
                     pc = static_cast<uint16_t>(pc + offset);
+                    return 12;
                 }
             }
-            break;
+            return 8;
 
         case 0x28: //jr z imm8 (jz)
             {
@@ -353,9 +354,10 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 if(reg.get_z_flag()) {
                     pc = static_cast<uint16_t>(pc + offset);
+                    return 12;
                 }
             }
-            break;
+            return 8;
 
         case 0x30: //jr nc imm8 (jnc)
             {
@@ -363,9 +365,10 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 if(!reg.get_c_flag()) {
                     pc = static_cast<uint16_t>(pc + offset);
+                    return 12;
                 }
             }
-            break;
+            return 8;
 
         case 0x38: //jr c imm8 (jc)
             {
@@ -373,9 +376,10 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 if(reg.get_c_flag()) {
                     pc = static_cast<uint16_t>(pc + offset);
+                    return 12;
                 }
             }
-            break;
+            return 8;
 
         case 0x10: //stop
             {
@@ -383,7 +387,7 @@ void CPU::execute(uint8_t opcode) {
                 //stops the cpu and puts lcd display into a low power mode until a button is pressed
                 //idk how the fuck i'll do that but lets see
             }
-            break;
+            return 4;
 
         //BLOCK 1
         // ld r8,r8 
@@ -454,14 +458,14 @@ void CPU::execute(uint8_t opcode) {
                 uint8_t dst_idx = (opcode >> 3) & 0x07;
                 uint8_t src_idx = opcode & 0x07;
                 set_r8(dst_idx, get_r8(src_idx));
+                return (dst_idx == 6 || src_idx == 6) ? 8 : 4;
             }
-            break;
 
         case 0x76: //ld [hl],[hl]; - halt
             {
                 
             }
-            break;
+            return 4;
 
         //BLOCK 2
         //add a,r8
@@ -476,8 +480,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(add_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //adc a,r8
         case 0x88: //adc a,b
@@ -491,8 +495,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(adc_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
             
         //sub a, r8
         case 0x90: //sub a,b
@@ -506,8 +510,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(sub_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //sbc a, r8
         case 0x98: //sbc a,b
@@ -521,8 +525,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(sbc_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //and a,r8
         case 0xA0: //and a,b
@@ -536,8 +540,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(and_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //xor a,r8
         case 0xA8: //xor a,b
@@ -551,8 +555,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(xor_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //or a,r8
         case 0xB0: //or a,b
@@ -566,8 +570,8 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 reg.set_a(or_a_r8(get_r8(reg_idx)));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
 
         //cp a,r8 - compare a with r8
         case 0xB8: //cp a,b
@@ -581,197 +585,221 @@ void CPU::execute(uint8_t opcode) {
             {
                 uint8_t reg_idx = opcode & 0x07;
                 sub_a_r8(get_r8(reg_idx));
+                return (reg_idx == 6) ? 8 : 4;
             }
-            break;
             
         case 0xC6: //add a,imm8
             {
                 reg.set_a(add_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xCE: //adc a,imm8
             {
                 reg.set_a(adc_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xD6: //sub a,imm8
             {
                 reg.set_a(sub_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xDE: //sbc a,imm8
             {
                 reg.set_a(sbc_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xE6: //and a,imm8
             {
                 reg.set_a(and_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xEE: //xor a,imm8
             {
                 reg.set_a(xor_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xF6: //or a,imm8
             {
                 reg.set_a(or_a_r8(mmu->readByte(pc)));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xFE: //cp a,imm8
             {
                 sub_a_r8(mmu->readByte(pc));
                 pc++;
             }
-            break;
+            return 8;
 
         case 0xE9: //jp hl
             {
                 pc = reg.get_hl();
             }
-            break;
+            return 4;
 
         case 0xC3: //jp imm16
             {
                 uint16_t val = mmu->readWord(pc);
                 pc = val;
             }
-            break;
+            return 16;
 
         //jp cond, imm16
         case 0xC2: //jp nz, imm16
             {
                 uint16_t val = mmu->readWord(pc);
                 pc += 2;
-                if(!reg.get_z_flag()) pc = val;
+                if(!reg.get_z_flag()) {
+                    pc = val;
+                    return 16;
+                }
             }
-            break;
+            return 12;
 
         case 0xCA: //jp z,imm16
             {
                 uint16_t val = mmu->readWord(pc);
                 pc += 2;
-                if(reg.get_z_flag()) pc = val;
+                if(reg.get_z_flag()) {
+                    pc = val;
+                    return 16;
+                }
             }
-            break;
+            return 12;
 
         case 0xD2: //jp nc,imm16
             {
                 uint16_t val = mmu->readWord(pc);
                 pc += 2;
-                if(!reg.get_c_flag()) pc = val;
+                if(!reg.get_c_flag()) {
+                    pc = val;
+                    return 16;
+                }
             }
-            break;
+            return 12;
 
         case 0xDA: //jp c, imm16
             {
                 uint16_t val = mmu->readWord(pc);
                 pc += 2;
-                if(reg.get_c_flag()) pc = val;
+                if(reg.get_c_flag()) {
+                    pc = val;
+                    return 16;
+                }
             }
-            break;
+            return 12;
 
         //pop r16stk
         case 0xC1: //pop bc
             {
                 reg.set_bc(pop16());
             }
-            break;
+            return 12;
 
         case 0xD1: //pop de
             {
                 reg.set_de(pop16());
             }
-            break;
+            return 12;
 
         case 0xE1: //pop hl
             {
                 reg.set_hl(pop16());
             }
-            break;
+            return 12;
 
         case 0xF1: //pop af
             {
                 reg.set_af(pop16());
             }
-            break;
+            return 12;
 
         //push r16stk
         case 0xC5: //push bc
             {
                 push16(reg.get_bc());
             }
-            break;
+            return 16;
 
         case 0xD5: //push de
             {
                 push16(reg.get_de());
             }
-            break;
+            return 16;
 
         case 0xE5: //push hl
             {
                 push16(reg.get_hl());
             }
-            break;
+            return 16;
 
         case 0xF5: //push af
             {
                 push16(reg.get_af());
             }
-            break;
+            return 16;
 
         case 0xC9: //ret
             {
                 pc = pop16();
             }
-            break;
+            return 16;
 
         case 0xD9: //reti
             {
                 pc = pop16();
                 // TODO: ime = true;
             }
-            break;
+            return 16;
 
         case 0xC0: //ret nz
             {
-                if(!reg.get_z_flag()) pc = pop16();
+                if(!reg.get_z_flag()) {
+                    pc = pop16();
+                    return 20;
+                }
             }
-            break;
+            return 8;
 
         case 0xC8:
             {
-                if(reg.get_z_flag()) pc = pop16();
+                if(reg.get_z_flag()) {
+                    pc = pop16();
+                    return 20;
+                }
             }
-            break;
+            return 8;
 
         case 0xD0: //ret nc
             {
-                if(!reg.get_c_flag()) pc = pop16();
+                if(!reg.get_c_flag()) {
+                    pc = pop16();
+                    return 20;
+                }
             }
-            break;
+            return 8;
 
         case 0xD8: //ret c
             {
-                if(reg.get_c_flag()) pc = pop16();
+                if(reg.get_c_flag()) {
+                    pc = pop16();
+                    return 20;
+                }
             }
-            break;
+            return 8;
 
         case 0xCD: //call imm16
             {
@@ -780,7 +808,7 @@ void CPU::execute(uint8_t opcode) {
                 push16(pc);      
                 pc = target;
             }
-            break;
+            return 24;
 
         case 0xC4: //call nz,imm16
             {
@@ -789,9 +817,10 @@ void CPU::execute(uint8_t opcode) {
                 if (!reg.get_z_flag()) {
                     push16(pc);
                     pc = target;
+                    return 24;
                 }
             }
-            break;
+            return 12;
 
         case 0xCC: //call z,imm16
             {
@@ -800,9 +829,10 @@ void CPU::execute(uint8_t opcode) {
                 if (reg.get_z_flag()) {
                     push16(pc);
                     pc = target;
+                    return 24;
                 }
             }
-            break;
+            return 12;
 
         case 0xD4: //call nc,imm16
             {
@@ -811,9 +841,10 @@ void CPU::execute(uint8_t opcode) {
                 if (!reg.get_c_flag()) {
                     push16(pc);
                     pc = target;
+                    return 24;
                 }
             }
-            break;
+            return 12;
 
         case 0xDC: //call c,imm16
             {
@@ -822,9 +853,10 @@ void CPU::execute(uint8_t opcode) {
                 if (reg.get_c_flag()) {
                     push16(pc);
                     pc = target;
+                    return 24;
                 }
             }
-            break;
+            return 12;
 
         //rst tgt3 
         case 0xC7: 
@@ -840,7 +872,7 @@ void CPU::execute(uint8_t opcode) {
                 uint16_t target = opcode & 0x38;
                 pc = target;
             }
-            break;
+            return 16;
 
         //ldh- high ram loads
         case 0xE0: // LDH [imm8], A
@@ -849,7 +881,7 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 mmu->writeByte(0xFF00 + offset, reg.get_a());
             }
-            break;
+            return 12;
 
         case 0xF0: // LDH A, [imm8]
             {
@@ -857,19 +889,19 @@ void CPU::execute(uint8_t opcode) {
                 pc++;
                 reg.set_a(mmu->readByte(0xFF00 + offset));
             }
-            break;
+            return 12;
 
         case 0xE2: // LDH [C], A
             {
                 mmu->writeByte(0xFF00 + reg.get_c(), reg.get_a());
             }
-            break;
+            return 8;
 
         case 0xF2: // LDH A, [C]
             {
                 reg.set_a(mmu->readByte(0xFF00 + reg.get_c()));
             }
-            break;
+            return 8;
 
         case 0xEA: // LD [imm16], A
             {
@@ -877,7 +909,7 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 mmu->writeByte(addr, reg.get_a());
             }
-            break;
+            return 16;
 
         case 0xFA: // LD A, [imm16]
             {
@@ -885,45 +917,44 @@ void CPU::execute(uint8_t opcode) {
                 pc += 2;
                 reg.set_a(mmu->readByte(addr));
             }
-            break;
+            return 16;
 
-            case 0xF9: // LD SP, HL
+        case 0xF9: // LD SP, HL
             {
                 sp = reg.get_hl();
             }
-            break;
+            return 8;
 
         case 0xE8: // ADD SP, imm8
             {
                 sp = add_sp_imm8();
             }
-            break;
+            return 16;
 
         case 0xF8: // LD HL, SP + imm8
             {
                 reg.set_hl(add_sp_imm8());
             }
-            break;
+            return 12;
 
         case 0xF3: // DI (Disable Interrupts)
             {
                 // TODO: ime = false;
             }
-            break;
+            return 4;
 
         case 0xFB: // EI (Enable Interrupts)
             {
                 // TODO: ime = true;
             }
-            break;
+            return 4;
 
         case 0xCB://prefix cb
             {
                 uint8_t cb_opcode = mmu->readByte(pc);
                 pc++;
-                executeCB(cb_opcode);
+                return executeCB(cb_opcode);
             }
-            break;
 
         default:
             printf("Unimplemented Opcode: 0x%02X at PC: 0x%04X\n", opcode, pc - 1);
