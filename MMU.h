@@ -3,6 +3,7 @@
 #include<array>
 #include<vector>
 #include<cstdint>
+#include "Timer.h"
 
 class MMU{
     private:
@@ -14,14 +15,23 @@ class MMU{
         std::array<uint8_t,128> ioreg{}; // I/O registers
         std::array<uint8_t,127> hram{};  // High ram
         uint8_t ieReg = 0;               // Input Enable Register   
+        Timer timer;
     
     public:
+        void update_timers(int cycles) {
+            timer.tick(cycles);
+        }
+
         void loadRom(const std::vector<uint8_t>& data) {
             //Load the rom from the data, don't need the filestream here
             rom = data;
         }
 
         uint8_t readByte(uint16_t addr) const {
+            if(addr >= 0xFF04 && addr <= 0xFF07) {
+                return timer.readByte(addr);
+            }
+
             //ROM
             if(addr <= 0x7FFF) {
                 if(addr < rom.size()) return rom[addr];
@@ -57,6 +67,12 @@ class MMU{
         }
 
         void writeByte(uint16_t addr, uint8_t val) {
+
+            if(addr >= 0xFF04 && addr <= 0xFF07) {
+                timer.writeByte(addr, val);
+                return; 
+            }
+            
             //ROM
             if(addr <= 0x7FFF) {
                 //Read Only ROM
