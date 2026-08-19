@@ -384,8 +384,8 @@ uint8_t CPU::execute(uint8_t opcode) {
         case 0x10: //stop
             {
                 pc++;
+                mmu->writeByte(0xFF04, 0x00); //resets the div
                 //stops the cpu and puts lcd display into a low power mode until a button is pressed
-                //idk how the fuck i'll do that but lets see
             }
             return 4;
 
@@ -463,7 +463,14 @@ uint8_t CPU::execute(uint8_t opcode) {
 
         case 0x76: //ld [hl],[hl]; - halt
             {
-                
+                uint8_t ie = mmu->readByte(0xFFFF);
+                uint8_t iflag = mmu->readByte(0xFF0F);
+                uint8_t pending = (ie & iflag & 0x1F);
+
+                bool effective_ime = ime || (scheduler == 1); // EI immediately before HALT: interrupts take effect in time for HALT to see them
+
+                if(!effective_ime && pending > 0) halt_bug = true;
+                else halted = true;
             }
             return 4;
 
@@ -760,8 +767,8 @@ uint8_t CPU::execute(uint8_t opcode) {
 
         case 0xD9: //reti
             {
+                ime = true;
                 pc = pop16();
-                // TODO: ime = true;
             }
             return 16;
 
@@ -939,13 +946,14 @@ uint8_t CPU::execute(uint8_t opcode) {
 
         case 0xF3: // DI (Disable Interrupts)
             {
-                // TODO: ime = false;
+                ime = false;
+                scheduler = 0;
             }
             return 4;
 
         case 0xFB: // EI (Enable Interrupts)
             {
-                // TODO: ime = true;
+                scheduler = 2;
             }
             return 4;
 

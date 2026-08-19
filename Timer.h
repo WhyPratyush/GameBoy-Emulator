@@ -14,7 +14,7 @@ private:
     int getClockThreshold();
 
 public:
-    void tick(int cycles);
+    bool tick(int cycles);
     uint8_t readByte(uint16_t addr) const;
     void writeByte(uint16_t addr, uint8_t val);
 };

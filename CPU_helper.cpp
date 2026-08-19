@@ -13,7 +13,8 @@ void CPU::reset() {
 
 uint8_t CPU::fetch() {
     uint8_t opcode = mmu->readByte(pc);
-    pc++;
+    if(halt_bug) halt_bug = false;
+    else pc++;
     return opcode;
 }
 
@@ -246,4 +247,36 @@ void CPU::set_r8(uint8_t index, uint8_t val) {
         case 6: mmu->writeByte(reg.get_hl(), val); break;
         default: reg.set_a(val); break;
     }
+}
+
+uint8_t CPU::interrupt_handler() {
+    if(scheduler > 0) {
+        scheduler--;
+        if(scheduler == 0) ime = true; 
+    }
+
+    uint8_t ie = mmu->readByte(0xFFFF);
+    uint8_t iflag = mmu->readByte(0xFF0F);
+    uint8_t interrupt = static_cast<uint8_t>(ie & iflag & 0x1F);
+
+    if(interrupt != 0 && halted) halted = false;
+
+    if((interrupt == 0 )|| !ime) return 0;
+    ime = false;
+
+    static const uint16_t addrs[5] = {0x0040,0x0048,0x0050,0x0058,0x0060};
+    for(uint8_t bit = 0; bit < 5; bit++) {
+        if(interrupt & (1 << bit)) {
+            uint8_t current_if = mmu->readByte(0xFF0F);
+            mmu->writeByte(0xFF0F, static_cast<uint8_t>(current_if & ~(1 << bit)));
+            push16(pc);
+            pc = addrs[bit];
+            return 20;
+        }
+    }
+    return 0;
+}
+
+bool CPU::is_halted() {
+    return halted;
 }

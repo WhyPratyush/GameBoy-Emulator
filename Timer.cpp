@@ -10,7 +10,8 @@ int Timer::getClockThreshold() {
     return 1024;
 }
 
-void Timer::tick(int cycles) {
+bool Timer::tick(int cycles) {
+    bool overflowed = false;
     divCounter += cycles;
     while (divCounter >= 256) {
         divCounter -= 256;
@@ -25,11 +26,12 @@ void Timer::tick(int cycles) {
             timaCounter -= threshold;
             if (tima == 0xFF) {
                 tima = tma; 
-                // TODO: Request Timer Interrupt (Set bit 2 in IF register)
+                overflowed = true;
             } 
             else tima++;
         }
     }
+    return overflowed;
 }
 
 uint8_t Timer::readByte(uint16_t addr) const {
