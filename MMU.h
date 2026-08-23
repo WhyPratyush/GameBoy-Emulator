@@ -4,8 +4,11 @@
 #include<array>
 #include<vector>
 #include<cstdint>
+#include<memory>
 #include "Timer.h"
 #include "PPU.h"
+#include "MBC1.h"
+#include<cstdlib>
 
 class MMU{
     private:
@@ -14,6 +17,7 @@ class MMU{
         std::array<uint8_t,8192> wram{}; // 8 kb work ram
         std::array<uint8_t,128> ioreg{}; // I/O registers
         std::array<uint8_t,127> hram{};  // High ram
+        std::unique_ptr<MBC> mbc;
         uint8_t ieReg = 0;               // Input Enable Register   
         Timer timer;
         uint8_t intFlag = 0xE0;            //Interrupt flag
@@ -31,8 +35,23 @@ class MMU{
         }
 
         void loadRom(const std::vector<uint8_t>& data) {
-            //Load the rom from the data, don't need the filestream here
             rom = data;
+            if(rom.size() < 0x0150) { //standard gb file needs to be atleast 0x0150 bytes
+                std::cerr<<"ROM too small.\n";
+                exit(1);
+            }
+            uint8_t cartridge = rom[0x0147];
+            switch(cartridge) {
+                case 0x00: 
+                    mbc = nullptr;
+                    break;
+                case 0x01: case 0x02: case 0x03:
+                    mbc = std::make_unique<MBC1>(rom);
+                    break;
+                default:
+                    std::cerr<<"Unsupported Cartridge Type: 0x"<<std::hex<<static_cast<int>(cartridge)<<std::endl;
+                    exit(1);
+            }
         }
 
         bool update_ppu(int cycles) {
@@ -63,8 +82,8 @@ class MMU{
 
             //ROM
             if(addr <= 0x7FFF) {
-                if(addr < rom.size()) return rom[addr];
-                else return 0xFF;
+                if(mbc) return mbc->readByte(addr);
+                return (addr < rom.size()) ? rom[addr] : 0xFF;
             }
 
             if ((addr >= 0x8000 && addr <= 0x9FFF) || (addr >= 0xFE00 && addr <= 0xFE9F) || (addr >= 0xFF40 && addr <= 0xFF4B)) {
@@ -72,7 +91,10 @@ class MMU{
             }
 
             //External RAM
-            if(addr <= 0xBFFF) return eram[addr-0xA000];
+            if(addr <= 0xBFFF) { 
+                if (mbc) return mbc->readByte(addr);
+                return eram[addr - 0xA000];
+            }
 
             //Work RAM
             if(addr <= 0xDFFF) return wram[addr-0xC000];
@@ -125,13 +147,10 @@ class MMU{
                 std::cout << c;
                 std::cout.flush();
             }
-
-            
             
             //ROM
             if(addr <= 0x7FFF) {
-                //Read Only ROM
-                //Later will implement the MBC bank switching for larger ROMs
+                if(mbc) mbc->writeByte(addr, val);
                 return;
             }
 
@@ -143,6 +162,10 @@ class MMU{
 
             //External RAM
             if(addr <= 0xBFFF) {
+                if(mbc) { 
+                    mbc->writeByte(addr,val);
+                    return;
+                }
                 eram[addr-0xA000] = val; 
                 return; 
             }
