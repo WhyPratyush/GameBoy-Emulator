@@ -8,6 +8,7 @@
 #include "Timer.h"
 #include "PPU.h"
 #include "MBC1.h"
+#include "MBC3.h"
 #include<cstdlib>
 
 class MMU{
@@ -47,6 +48,9 @@ class MMU{
                     break;
                 case 0x01: case 0x02: case 0x03:
                     mbc = std::make_unique<MBC1>(rom);
+                    break;
+                case 0x0F: case 0x10: case 0x11: case 0x12: case 0x13:
+                    mbc = std::make_unique<MBC3>(rom);
                     break;
                 default:
                     std::cerr<<"Unsupported Cartridge Type: 0x"<<std::hex<<static_cast<int>(cartridge)<<std::endl;
