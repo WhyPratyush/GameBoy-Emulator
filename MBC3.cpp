@@ -18,7 +18,10 @@ void MBC3::writeByte(uint16_t addr, uint8_t val) {
         if(ramRtcEnabled) {
             if(ramRtcSelect <= 0x07 && !eram.empty()) {
                 uint32_t offset = static_cast<uint32_t>((ramRtcSelect * 0x2000) + (addr-0xA000));
-                if(offset < eram.size()) eram[offset] = val;
+                if(offset < eram.size()) {
+                    eram[offset] = val;
+                    isDirty = true;
+                }
             }
             else if(ramRtcSelect >= 0x08 && ramRtcSelect <= 0x0C) {
                 //rtc write
@@ -45,4 +48,13 @@ uint8_t MBC3::readByte(uint16_t addr) {
         }
     }
     return 0xFF;
+}
+
+const std::vector<uint8_t>& MBC3::getRam() const{
+    return eram;
+}
+
+void MBC3::loadRam(const std::vector<uint8_t>& savedData) {
+    size_t n = std::min(savedData.size(),eram.size());
+    std::copy(savedData.begin(), savedData.begin() + static_cast<ptrdiff_t>(n), eram.begin());
 }

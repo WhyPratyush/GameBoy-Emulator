@@ -4,8 +4,12 @@ GameBoy::GameBoy() : cpu(&mmu) {
     totalCycles = 0;
 }
 
-void GameBoy::loadRom(const std::vector<uint8_t>& rom_data) {
-    mmu.loadRom(rom_data);
+void GameBoy::loadRom(const std::vector<uint8_t>& rom_data,const std::string &filePath) {
+    mmu.loadRom(rom_data,filePath);
+}
+
+void GameBoy::saveBattery(bool save) {
+    mmu.saveBattery(save);
 }
 
 uint16_t GameBoy::getPC() { return cpu.get_pc(); }

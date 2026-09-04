@@ -24,6 +24,7 @@ void MBC1::writeByte(uint16_t addr, uint8_t val) {
             uint32_t offset = static_cast<uint32_t>((bankingMode ? ramBank : 0) * 0x2000 + (addr - 0xA000));
             if(offset < eram.size()) {
                 eram[offset] = val;
+                isDirty = true;
             }
         }
     }
@@ -44,4 +45,13 @@ uint8_t MBC1::readByte(uint16_t addr) {
         return (offset < eram.size()) ? eram[offset] : 0xFF;
     }
     return 0xFF;
+}
+
+const std::vector<uint8_t>& MBC1::getRam() const{
+    return eram;
+}
+
+void MBC1::loadRam(const std::vector<uint8_t>& savedData) {
+    size_t n = std::min(savedData.size(),eram.size());
+    std::copy(savedData.begin(), savedData.begin() + static_cast<ptrdiff_t>(n), eram.begin());
 }

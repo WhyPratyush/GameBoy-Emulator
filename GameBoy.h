@@ -2,6 +2,7 @@
 #include "CPU.h"
 #include "MMU.h"
 #include<vector>
+#include<string>
 #include<cstdint>
 #include<array>
 #include<SDL2/SDL.h>
@@ -19,11 +20,12 @@ public:
     uint16_t getPC();
     bool isHalted();
     bool getIME();
-    void loadRom(const std::vector<uint8_t>& rom_data);
+    void loadRom(const std::vector<uint8_t>& rom_data,const std::string &filePath);
     uint8_t stepInstruction(); 
     void stepFrame();          
     void run();                
     bool pollFrameReady();
     void joypad(SDL_Keycode key, bool isKeyUp);
+    void saveBattery(bool save);
     const std::array<uint8_t, 160*144>& getFrameBuffer();
 };

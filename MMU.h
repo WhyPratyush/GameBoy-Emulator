@@ -10,6 +10,7 @@
 #include "MBC1.h"
 #include "MBC3.h"
 #include<cstdlib>
+#include<fstream>
 
 class MMU{
     private:
@@ -23,6 +24,8 @@ class MMU{
         Timer timer;
         uint8_t intFlag = 0xE0;            //Interrupt flag
         PPU ppu;
+        bool hasBattery = false;
+        std::string saveFilePath;
         
     public:
         uint8_t actionKeys = 0x0F; 
@@ -35,26 +38,62 @@ class MMU{
             }
         }
 
-        void loadRom(const std::vector<uint8_t>& data) {
+        void saveBattery(bool save) {
+            if(mbc && mbc->hasBattery()) {
+                if(save || mbc->pollDirty()) {
+                    std::ofstream saveFile(saveFilePath,std::ios::binary);
+                    if(saveFile.is_open()) {
+                        const std::vector<uint8_t>& ramData = mbc->getRam();
+                        saveFile.write(reinterpret_cast<const char*>(ramData.data()), static_cast<std::streamsize>(ramData.size()));
+                    }
+                }
+            }
+        }
+
+        void loadRom(const std::vector<uint8_t>& data, const std::string &filePath) {
             rom = data;
             if(rom.size() < 0x0150) { //standard gb file needs to be atleast 0x0150 bytes
                 std::cerr<<"ROM too small.\n";
                 exit(1);
             }
+
+            size_t sepIdx = filePath.find_last_of("/\\");
+            size_t start = (sepIdx == std::string::npos) ? 0 : sepIdx + 1;
+            size_t dotIdx = filePath.find('.', start);
+
+            saveFilePath = (dotIdx != std::string::npos) ? filePath.substr(0, dotIdx) + ".sav" : filePath + ".sav";
+
             uint8_t cartridge = rom[0x0147];
+            if(cartridge == 0x03 || cartridge == 0x0F || cartridge == 0x10 || cartridge == 0x13 || cartridge == 0x1B || cartridge == 0x1E) hasBattery = true;
+            uint8_t ramSizeByte = rom[0x0149];
+            bool isMBC30 = (ramSizeByte == 0x05) || (rom.size() > 2 * 1024 * 1024);
+
             switch(cartridge) {
                 case 0x00: 
                     mbc = nullptr;
                     break;
                 case 0x01: case 0x02: case 0x03:
-                    mbc = std::make_unique<MBC1>(rom);
+                    mbc = std::make_unique<MBC1>(rom,hasBattery);
                     break;
                 case 0x0F: case 0x10: case 0x11: case 0x12: case 0x13:
-                    mbc = std::make_unique<MBC3>(rom);
+                    mbc = std::make_unique<MBC3>(rom,hasBattery,isMBC30);
                     break;
                 default:
                     std::cerr<<"Unsupported Cartridge Type: 0x"<<std::hex<<static_cast<int>(cartridge)<<std::endl;
                     exit(1);
+            }
+
+            if(mbc && mbc->hasBattery()) {
+                std::ifstream saveFile(saveFilePath,std::ios::binary | std::ios::ate);
+                if(saveFile.is_open()) {
+                    std::streamsize sz = saveFile.tellg();
+                    saveFile.seekg(0,std::ios::beg);
+                    std::vector<uint8_t> saveVec(static_cast<size_t>(sz));
+                    if(saveFile.read(reinterpret_cast<char*>(saveVec.data()),sz)) {
+                        mbc->loadRam(saveVec);
+                    }
+                    saveFile.close();
+                }
             }
         }
 

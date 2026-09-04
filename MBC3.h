@@ -13,8 +13,13 @@ private:
     bool ramRtcEnabled = false;
 
 public:
-    MBC3(const std::vector<uint8_t>& romData, bool isMBC30 = false) 
-        : rom(romData), eram(64 * 1024, 0xFF),romMask(isMBC30 ? 0xFF: 0x7F)  {};
+    MBC3(const std::vector<uint8_t>& romData, bool hasBattery, bool isMBC30 = false) 
+        : rom(romData), eram(64 * 1024, 0xFF),romMask(isMBC30 ? 0xFF: 0x7F)  {
+            battery = hasBattery;
+        };
     uint8_t readByte(uint16_t addr) override;
     void writeByte(uint16_t addr, uint8_t val) override;
+
+    const std::vector<uint8_t>& getRam() const override;
+    void loadRam(const std::vector<uint8_t>& savedData) override;   
 };

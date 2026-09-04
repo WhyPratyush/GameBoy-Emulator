@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     }
 
     GameBoy gb;
-    gb.loadRom(romData);
+    gb.loadRom(romData,argv[1]);
 
     Renderer rd;
     bool isRunning = true;
@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
     using frame_duration = std::chrono::duration<int64_t, std::ratio<70224, 4194304>>;
     using clock = std::chrono::steady_clock;
     auto start = clock::now();
+    auto lastSaveTime = clock::now();
 
     while(isRunning) {
         while (SDL_PollEvent(&event)) {
@@ -47,10 +48,18 @@ int main(int argc, char* argv[]) {
             else if(event.type == SDL_KEYUP) gb.joypad(event.key.keysym.sym, true);
         }
         gb.stepFrame();
-        if(gb.pollFrameReady()) rd.show(gb.getFrameBuffer());
+        if(gb.pollFrameReady()) {
+            rd.show(gb.getFrameBuffer());
+            auto curTime = clock::now();
+            if(curTime - lastSaveTime >= std::chrono::seconds(1)) {
+                gb.saveBattery(false);
+                lastSaveTime = curTime;
+            }
+        }
         start += std::chrono::duration_cast<clock::duration>(frame_duration(1));
         std::this_thread::sleep_until(start);
     }
 
+    gb.saveBattery(true);
     return 0;
 }

@@ -12,8 +12,12 @@ private:
     std::vector<uint8_t> eram; 
 
 public:
-    MBC1(const std::vector<uint8_t>& romData) : rom(romData), eram(32*1024, 0xFF) {}
+    MBC1(const std::vector<uint8_t>& romData,bool hasBattery) : rom(romData), eram(32*1024, 0xFF) {
+        battery = hasBattery;
+    }
     
     uint8_t readByte(uint16_t addr) override;
     void writeByte(uint16_t addr, uint8_t val) override;
+    const std::vector<uint8_t>& getRam() const override;
+    void loadRam(const std::vector<uint8_t>& savedData) override;
 };
