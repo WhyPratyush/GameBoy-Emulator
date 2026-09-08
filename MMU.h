@@ -9,6 +9,7 @@
 #include "PPU.h"
 #include "MBC1.h"
 #include "MBC3.h"
+#include "MBC5.h"
 #include<cstdlib>
 #include<fstream>
 
@@ -66,7 +67,18 @@ class MMU{
 
             uint8_t cartridge = rom[0x0147];
             if(cartridge == 0x03 || cartridge == 0x0F || cartridge == 0x10 || cartridge == 0x13 || cartridge == 0x1B || cartridge == 0x1E) hasBattery = true;
+            bool hasRumble = (cartridge == 0x1C || cartridge == 0x1D || cartridge == 0x1E);
             uint8_t ramSizeByte = rom[0x0149];
+            size_t ramSize = 0;
+
+            switch(ramSizeByte) {
+                case 0x02: ramSize = 8 * 1024;   break; 
+                case 0x03: ramSize = 32 * 1024;  break; 
+                case 0x04: ramSize = 128 * 1024; break; 
+                case 0x05: ramSize = 64 * 1024;  break; 
+                default:   ramSize = 0;          break;
+            }
+
             bool isMBC30 = (ramSizeByte == 0x05) || (rom.size() > 2 * 1024 * 1024);
 
             switch(cartridge) {
@@ -78,6 +90,9 @@ class MMU{
                     break;
                 case 0x0F: case 0x10: case 0x11: case 0x12: case 0x13:
                     mbc = std::make_unique<MBC3>(rom,hasBattery,isMBC30);
+                    break;
+                case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E:
+                    mbc = std::make_unique<MBC5>(rom, ramSize,hasRumble);
                     break;
                 default:
                     std::cerr<<"Unsupported Cartridge Type: 0x"<<std::hex<<static_cast<int>(cartridge)<<std::endl;
