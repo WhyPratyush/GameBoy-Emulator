@@ -2,6 +2,13 @@
 #include<vector>
 #include<algorithm>
 
+PPU::PPU() {
+    lcd_regs[0] = 0x91; 
+    lcd_regs[7] = 0xFC; 
+    lcd_regs[8] = 0xFF; 
+    lcd_regs[9] = 0xFF; 
+}
+
 uint8_t PPU::readByte(uint16_t addr) const {
     if (addr >= 0x8000 && addr <= 0x9FFF) return vram[addr - 0x8000];
     if (addr >= 0xFE00 && addr <= 0xFE9F) return oam[addr - 0xFE00];

@@ -2,11 +2,13 @@
 #include "MBC.h"
 #include<vector>
 #include<cstdint>
+#include "RTC.h"
 
 class MBC3 : public MBC {
 private:
     const std::vector<uint8_t>& rom;
     std::vector<uint8_t> eram;
+    RTC rtc;
 
     uint16_t romBank = 1; 
     uint8_t ramRtcSelect = 0, romMask;
@@ -19,7 +21,8 @@ public:
         };
     uint8_t readByte(uint16_t addr) override;
     void writeByte(uint16_t addr, uint8_t val) override;
+    void tick(int cycles) override;
 
-    const std::vector<uint8_t>& getRam() const override;
+    const std::vector<uint8_t> getRam() const override;
     void loadRam(const std::vector<uint8_t>& savedData) override;   
 };

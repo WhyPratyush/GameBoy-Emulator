@@ -1,4 +1,5 @@
 #include "MBC3.h"
+#include <fstream>
 
 void MBC3::writeByte(uint16_t addr, uint8_t val) {
     if(addr <= 0x1FFF) { //ram and rtc enable
@@ -9,10 +10,10 @@ void MBC3::writeByte(uint16_t addr, uint8_t val) {
         if (romBank == 0) romBank = 1;
     }
     else if(addr <= 0x5FFF) { //ram bank no./rtc reg select
-        ramRtcSelect = val;
+        ramRtcSelect = val & 0x0F;
     }
     else if(addr <= 0x7FFF) { //latch clock data
-        //rtc logic
+        rtc.writeLatch(val);
     }
     else if(addr >= 0xA000 && addr <= 0xBFFF) { //eram / rtc write
         if(ramRtcEnabled) {
@@ -24,7 +25,8 @@ void MBC3::writeByte(uint16_t addr, uint8_t val) {
                 }
             }
             else if(ramRtcSelect >= 0x08 && ramRtcSelect <= 0x0C) {
-                //rtc write
+                rtc.writeReg(ramRtcSelect,val);
+                isDirty = true;
             }
         }
     }
@@ -43,18 +45,29 @@ uint8_t MBC3::readByte(uint16_t addr) {
             return (offset < eram.size()) ? eram[offset] : 0xFF;
         } 
         else if(ramRtcSelect >= 0x08 && ramRtcSelect <= 0x0C) {
-            //rtc read
-            return 0xFF;
+            return rtc.readReg(ramRtcSelect);
         }
     }
     return 0xFF;
 }
 
-const std::vector<uint8_t>& MBC3::getRam() const{
-    return eram;
+const std::vector<uint8_t> MBC3::getRam() const{
+    std::vector<uint8_t> data = eram;
+    std::vector<uint8_t> rtcData = rtc.serialize();
+    data.insert(data.end(), rtcData.begin(), rtcData.end());
+    return data;
 }
 
 void MBC3::loadRam(const std::vector<uint8_t>& savedData) {
     size_t n = std::min(savedData.size(),eram.size());
     std::copy(savedData.begin(), savedData.begin() + static_cast<ptrdiff_t>(n), eram.begin());
+
+    if(savedData.size() >= eram.size() + 13) {
+        std::vector<uint8_t> rtcData(savedData.begin() + static_cast<ptrdiff_t>(eram.size()), savedData.end());
+        rtc.deserialize(rtcData);
+    }
+}
+
+void MBC3::tick(int cycles) {
+    rtc.tick(cycles);
 }

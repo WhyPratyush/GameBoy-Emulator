@@ -36,6 +36,7 @@ class MMU{
             if(timer.tick(cycles)) {
                 requestInterrupt(2);
             }
+            if(mbc) mbc->tick(cycles);
         }
 
         void saveBattery(bool save) {

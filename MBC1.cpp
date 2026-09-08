@@ -47,7 +47,7 @@ uint8_t MBC1::readByte(uint16_t addr) {
     return 0xFF;
 }
 
-const std::vector<uint8_t>& MBC1::getRam() const{
+const std::vector<uint8_t> MBC1::getRam() const{
     return eram;
 }
 

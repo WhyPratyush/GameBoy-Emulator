@@ -18,6 +18,7 @@ private:
     uint8_t windowLine = 0;
 
 public:
+    PPU();
     uint8_t step(uint8_t cycles);
     uint8_t readByte(uint16_t addr) const;
     void writeByte(uint16_t addr, uint8_t val);
