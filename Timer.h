@@ -3,7 +3,7 @@
 
 class Timer {
 private:
-    uint8_t div = 0;
+    uint8_t div = 0xAB;
     uint8_t tima = 0;
     uint8_t tma = 0;
     uint8_t tac = 0;

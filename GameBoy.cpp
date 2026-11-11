@@ -32,6 +32,7 @@ uint8_t GameBoy::stepInstruction() {
         totalCycles += interruptCycles;
         mmu.update_timers(interruptCycles);
         if(mmu.update_ppu(interruptCycles)) isReady = true;
+        mmu.update_apu(interruptCycles);
         return interruptCycles;
     }
 
@@ -39,6 +40,7 @@ uint8_t GameBoy::stepInstruction() {
         totalCycles += 4;
         mmu.update_timers(4);
         if(mmu.update_ppu(4)) isReady = true;
+        mmu.update_apu(4);
         return 4;
     }
 
@@ -48,6 +50,7 @@ uint8_t GameBoy::stepInstruction() {
     totalCycles += cycles;
     mmu.update_timers(cycles);
     if(mmu.update_ppu(cycles)) isReady = true;
+    mmu.update_apu(cycles);
     
     return cycles;
 }

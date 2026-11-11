@@ -30,6 +30,24 @@ int main(int argc, char* argv[]) {
     GameBoy gb;
     gb.loadRom(romData,argv[1]);
 
+    SDL_InitSubSystem(SDL_INIT_AUDIO); 
+    
+    SDL_AudioSpec desiredSpec = {};
+    desiredSpec.freq = 48000;
+    desiredSpec.format = AUDIO_F32; 
+    desiredSpec.channels = 2;       
+    desiredSpec.samples = 1024;
+
+    SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(NULL, 0, &desiredSpec, NULL, 0);
+    if(audioDevice == 0) {
+        std::cerr<<"Audio open failed: "<<SDL_GetError()<<"\n";
+    }
+    else {
+        std::vector<float> prime(3200, 0.0f); 
+        SDL_QueueAudio(audioDevice, prime.data(), static_cast<Uint32>(prime.size() * sizeof(float)));
+        SDL_PauseAudioDevice(audioDevice, 0);
+    }
+
     Renderer rd;
     bool isRunning = true;
     SDL_Event event;
@@ -48,6 +66,13 @@ int main(int argc, char* argv[]) {
             else if(event.type == SDL_KEYUP) gb.joypad(event.key.keysym.sym, true);
         }
         gb.stepFrame();
+
+        const auto& audioData = gb.getAudioBuffer();
+        if(!audioData.empty() && SDL_GetQueuedAudioSize(audioDevice) < 4096 * sizeof(float)) {
+            SDL_QueueAudio(audioDevice, audioData.data(), static_cast<Uint32>(audioData.size() * sizeof(float)));
+        }
+        gb.clearAudioBuffer();
+
         if(gb.pollFrameReady()) {
             rd.show(gb.getFrameBuffer());
             auto curTime = clock::now();
@@ -59,6 +84,8 @@ int main(int argc, char* argv[]) {
         start += std::chrono::duration_cast<clock::duration>(frame_duration(1));
         std::this_thread::sleep_until(start);
     }
+
+    SDL_CloseAudioDevice(audioDevice);
 
     gb.saveBattery(true);
     return 0;

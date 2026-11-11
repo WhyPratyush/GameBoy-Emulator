@@ -17,15 +17,16 @@ void MBC5::writeByte(uint16_t addr, uint8_t val) {
         romBank = (romBank & 0x100) | val;
     }
     else if(addr <= 0x3FFF) { //high bit of rom bank 
-        romBank = (romBank & 0xFF) | (static_cast<uint16_t>(val & 0x01) << 8);
+        romBank = static_cast<uint16_t>((romBank & 0xFF) | (static_cast<uint16_t>(val & 0x01) << 8));
     }
     else if(addr <= 0x5FFF) { //ram bank number / upper bits of rom bank number
         if (hasRumble) {
             bool rumbleActive = (val & 0x08) != 0;
-            ramBank = val & 0x07; 
+            (void) rumbleActive;
+            ramBank = static_cast<uint8_t>(val & 0x07); 
             //TODO: rumble
         } 
-        else ramBank = val & 0x0F;
+        else ramBank = static_cast<uint8_t>(val & 0x0F);
     }
     else if(addr >= 0xA000 && addr <= 0xBFFF) { //external ram write
         if(ramEnabled && !eram.empty()) {

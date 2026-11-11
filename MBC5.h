@@ -12,7 +12,9 @@ private:
     std::vector<uint8_t> eram; 
 
 public:
-    MBC5(const std::vector<uint8_t>& romData, size_t ramSize,bool rumble = false) : rom(romData), eram(ramSize, 0xFF), hasRumble(rumble) {}
+    MBC5(const std::vector<uint8_t>& romData, size_t ramSize,bool hasBattery,bool rumble = false) : hasRumble(rumble), rom(romData), eram(ramSize, 0xFF) {
+        battery = hasBattery;
+    }
 
     uint8_t readByte(uint16_t addr) override;
     void writeByte(uint16_t addr, uint8_t val) override;

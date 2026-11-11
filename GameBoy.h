@@ -21,6 +21,8 @@ public:
     bool isHalted();
     bool getIME();
     void loadRom(const std::vector<uint8_t>& rom_data,const std::string &filePath);
+    const std::vector<float>& getAudioBuffer() { return mmu.getAudioBuffer(); }
+    void clearAudioBuffer() { mmu.clearAudioBuffer(); }
     uint8_t stepInstruction(); 
     void stepFrame();          
     void run();                

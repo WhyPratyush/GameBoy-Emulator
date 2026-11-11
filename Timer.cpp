@@ -39,7 +39,7 @@ uint8_t Timer::readByte(uint16_t addr) const {
         case 0xFF04: return div;
         case 0xFF05: return tima;
         case 0xFF06: return tma;
-        case 0xFF07: return tac;
+        case 0xFF07: return tac | 0xF8;
         default: return 0xFF;
     }
 }

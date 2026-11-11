@@ -10,6 +10,7 @@
 #include "MBC1.h"
 #include "MBC3.h"
 #include "MBC5.h"
+#include "APU.h"
 #include<cstdlib>
 #include<fstream>
 
@@ -23,10 +24,11 @@ class MMU{
         std::unique_ptr<MBC> mbc;
         uint8_t ieReg = 0;               // Input Enable Register   
         Timer timer;
-        uint8_t intFlag = 0xE0;            //Interrupt flag
+        uint8_t intFlag = 0xE1;            //Interrupt flag
         PPU ppu;
         bool hasBattery = false;
         std::string saveFilePath;
+        APU apu;
         
     public:
         uint8_t actionKeys = 0x0F; 
@@ -38,6 +40,18 @@ class MMU{
                 requestInterrupt(2);
             }
             if(mbc) mbc->tick(cycles);
+        }
+
+        void update_apu(int cycles) {
+            apu.tick(cycles);
+        }
+
+        const std::vector<float>& getAudioBuffer() { 
+            return apu.getAudioBuffer(); 
+        }
+
+        void clearAudioBuffer() {
+            apu.clearAudioBuffer();
         }
 
         void saveBattery(bool save) {
@@ -92,7 +106,7 @@ class MMU{
                     mbc = std::make_unique<MBC3>(rom,hasBattery,isMBC30);
                     break;
                 case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D: case 0x1E:
-                    mbc = std::make_unique<MBC5>(rom, ramSize,hasRumble);
+                    mbc = std::make_unique<MBC5>(rom, ramSize,hasBattery,hasRumble);
                     break;
                 default:
                     std::cerr<<"Unsupported Cartridge Type: 0x"<<std::hex<<static_cast<int>(cartridge)<<std::endl;
@@ -125,8 +139,8 @@ class MMU{
             if(addr == 0xFF00) {
                 uint8_t result = joypadReg | 0xCF; 
 
-                if ((joypadReg & (1 << 4)) == 0) result &= (dirKeys | 0xF0);
-                if ((joypadReg & (1 << 5)) == 0) result &= (actionKeys | 0xF0);
+                if((joypadReg & (1 << 4)) == 0) result &= (dirKeys | 0xF0);
+                if((joypadReg & (1 << 5)) == 0) result &= (actionKeys | 0xF0);
                 
                 return result;
             }
@@ -163,6 +177,9 @@ class MMU{
 
             //Unsuable region
             if(addr <= 0xFEFF) return 0xFF;
+
+            //APU
+            if(addr >= 0xFF10 && addr <= 0xFF3F) return apu.readByte(addr);
 
             //I/O regs
             if(addr <= 0xFF7F) return ioreg[addr-0xFF00];
@@ -243,6 +260,12 @@ class MMU{
 
             //Unsuable region
             if(addr <= 0xFEFF) return;
+
+            //APU
+            if(addr >= 0xFF10 && addr <= 0xFF3F) {
+                apu.writeByte(addr, val);
+                return;
+            }
 
             //I/O regs
             if(addr <= 0xFF7F) {
