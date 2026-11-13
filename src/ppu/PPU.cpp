@@ -12,6 +12,7 @@ PPU::PPU() {
 uint8_t PPU::readByte(uint16_t addr) const {
     if (addr >= 0x8000 && addr <= 0x9FFF) return vram[addr - 0x8000];
     if (addr >= 0xFE00 && addr <= 0xFE9F) return oam[addr - 0xFE00];
+    if (addr == 0xFF41) return lcd_regs[1] | 0x80;
     if (addr >= 0xFF40 && addr <= 0xFF4B) return lcd_regs[addr - 0xFF40];
     return 0xFF;
 }
@@ -30,6 +31,29 @@ void PPU::writeByte(uint16_t addr, uint8_t val) {
         } 
         else if (offset == 4) {
             //LY is read only
+        }
+        else if (offset == 0) {
+            bool wasOn = (lcd_regs[0] & 0x80) != 0;
+            bool nowOn = (val & 0x80) != 0;
+            lcd_regs[0] = val;
+            if(wasOn && !nowOn) {                
+                ly = 0; 
+                modeCounter = 0; 
+                mode = 0; 
+                windowLine = 0;
+                lcd_regs[4] = 0;
+                lcd_regs[1] &= 0xF8;              
+            }
+            else if(!wasOn && nowOn) {            
+                ly = 0; 
+                modeCounter = 0;
+                mode = 2; 
+                windowLine = 0; 
+                firstLine = true;
+                lcd_regs[4] = 0;
+                lcd_regs[1] &= 0xFC;               
+                setLYCCompareFlag(lcd_regs[5] == 0);
+            }
         }
         else {
             lcd_regs[offset] = val;
@@ -140,6 +164,7 @@ uint8_t PPU::step(uint8_t cycles) {
             if(modeCounter >= 80) {
                 modeCounter -= 80;
                 mode = 3;
+                firstLine = false;
             }
             break;
 
@@ -158,7 +183,8 @@ uint8_t PPU::step(uint8_t cycles) {
     }
 
     lcd_regs[4] = ly;
-    lcd_regs[1] = (lcd_regs[1] & 0xFC) | (mode & 0x03);
+    uint8_t firstLineMode = (firstLine && mode == 2) ? 0 : mode;
+    lcd_regs[1] = (lcd_regs[1] & 0xFC) | (firstLineMode & 0x03);
 
     uint8_t lyc = lcd_regs[5]; 
     bool wasMatch = getLYCCompareFlag();

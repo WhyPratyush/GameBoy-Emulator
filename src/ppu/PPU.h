@@ -16,6 +16,7 @@ private:
     uint8_t mode = 2;        
     uint8_t ly = 0;
     uint8_t windowLine = 0;
+    bool firstLine = false;
 
 public:
     PPU();
