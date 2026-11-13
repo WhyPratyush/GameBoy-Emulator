@@ -53,10 +53,10 @@ uint8_t RTC::readReg(uint8_t reg) const {
 
 void RTC::writeReg(uint8_t reg, uint8_t val) {
     switch (reg) {
-        case 0x08: live.rtc_s  = val & 0x3F; break; 
+        case 0x08: live.rtc_s  = val & 0x3F; cycleCounter = 0; break; 
         case 0x09: live.rtc_m  = val & 0x3F; break; 
         case 0x0A: live.rtc_h  = val & 0x1F; break; 
-        case 0x0B: live.rtc_dl = val;        break; 
+        case 0x0B: live.rtc_dl = val; break; 
         case 0x0C: live.rtc_dh = val & 0xC1; break; 
     }
 }
